@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOVA — Audio Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Full-screen canvas -->
+    <canvas id="canvas2d"></canvas>
+    <canvas id="canvasWebGL" style="display:none;"></canvas>
+
+    <!-- Idle splash -->
+    <div id="splash" class="splash">
+        <div class="splash-content">
+            <h1 class="splash-title">NOVA</h1>
+            <p class="splash-sub">Immersive Audio Visualizer</p>
+            <div class="splash-actions">
+                <button id="systemAudioBtn" class="btn btn-glow">
+                    <span class="btn-icon">◉</span> Capture System Audio
+                </button>
+                <button id="fileBtn" class="btn btn-outline">
+                    <span class="btn-icon">♫</span> Upload Audio File
+                </button>
+            </div>
+            <p class="splash-hint">Press <kbd>H</kbd> to toggle UI &middot; <kbd>F</kbd> fullscreen &middot; <kbd>1-8</kbd> switch modes</p>
+        </div>
+    </div>
+
+    <!-- Top-left: live stats (hidden until audio starts) -->
+    <div id="statsPanel" class="glass-panel stats-panel hidden">
+        <div class="stat-row">
+            <span class="stat-label">BPM</span>
+            <span id="bpmValue" class="stat-value accent">—</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Energy</span>
+            <div class="stat-bar-wrap"><div id="energyBar" class="stat-bar"></div></div>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Bass</span>
+            <div class="stat-bar-wrap"><div id="bassBar" class="stat-bar bass"></div></div>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Mid</span>
+            <div class="stat-bar-wrap"><div id="midBar" class="stat-bar mid"></div></div>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Treble</span>
+            <div class="stat-bar-wrap"><div id="trebleBar" class="stat-bar treble"></div></div>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Beat</span>
+            <span id="beatDot" class="beat-dot"></span>
+        </div>
+        <div class="stat-row mini">
+            <span class="stat-label">FPS</span>
+            <span id="fpsValue" class="stat-value dim">60</span>
+        </div>
+        <div class="stat-row mini">
+            <span class="stat-label">Particles</span>
+            <span id="particleValue" class="stat-value dim">0</span>
+        </div>
+    </div>
+
+    <!-- Bottom: floating control bar -->
+    <div id="controlBar" class="glass-panel control-bar hidden">
+        <div class="cb-group">
+            <button id="stopBtn" class="btn btn-sm btn-danger" disabled>■ Stop</button>
+        </div>
+        <div class="cb-divider"></div>
+        <div class="cb-group">
+            <label class="cb-label">Mode</label>
+            <select id="visualMode" class="cb-select">
+                <option value="combined">Combined</option>
+                <option value="particles">Particles</option>
+                <option value="waveform">Waveform</option>
+                <option value="spectrum">Spectrum</option>
+                <option value="3d">3D Shapes</option>
+                <option value="tunnel">Tunnel</option>
+                <option value="kaleidoscope">Kaleidoscope</option>
+                <option value="galaxy">Galaxy</option>
+            </select>
+        </div>
+        <div class="cb-divider"></div>
+        <div class="cb-group">
+            <label class="cb-label">Theme</label>
+            <select id="colorTheme" class="cb-select">
+                <option value="neon">Neon Party</option>
+                <option value="ocean">Deep Ocean</option>
+                <option value="fire">Inferno</option>
+                <option value="aurora">Aurora</option>
+                <option value="mono">Monochrome</option>
+                <option value="candy">Candy</option>
+                <option value="cosmic">Cosmic</option>
+                <option value="matrix">Matrix</option>
+                <option value="sunset">Sunset</option>
+            </select>
+        </div>
+        <div class="cb-divider"></div>
+        <div class="cb-group">
+            <label class="cb-label">Sensitivity</label>
+            <input type="range" id="sensitivity" class="cb-slider" min="0.1" max="5" step="0.1" value="1.2">
+        </div>
+        <div class="cb-group">
+            <label class="cb-label">Particles</label>
+            <input type="range" id="particleCount" class="cb-slider" min="200" max="8000" step="200" value="2000">
+        </div>
+        <div class="cb-divider"></div>
+        <div class="cb-group">
+            <button id="fullscreenBtn" class="btn btn-sm btn-ghost" title="Fullscreen (F)">⛶</button>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" crossorigin="anonymous"></audio>
+    <input type="file" id="audioFile" accept="audio/*" style="display:none;">
+
+    <script src="src/audioAnalyzer.js"></script>
+    <script src="src/beatDetector.js"></script>
+    <script src="src/colorGradient.js"></script>
+    <script src="src/particleSystem.js"></script>
+    <script src="src/waveformRenderer.js"></script>
+    <script src="src/threeDRenderer.js"></script>
+    <script src="src/starfield.js"></script>
+    <script src="src/lightning.js"></script>
+    <script src="src/visualizationEngine.js"></script>
+    <script src="src/app.js"></script>
+</body>
+</html>
