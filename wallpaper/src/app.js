@@ -96,8 +96,8 @@ class AudioVisualizationApp {
                 this.beatDetector.detectBass(freq);
                 this.visualizationEngine.render(freq, time, beat, energy, bands);
             } else {
-                const silence     = new Uint8Array(128);
-                const silenceTime = new Uint8Array(128).fill(128);
+                const silence     = new Uint8Array(512);
+                const silenceTime = new Uint8Array(512).fill(128);
                 const bands = { bass: 0, mid: 0, treble: 0 };
                 this.visualizationEngine.render(silence, silenceTime, false, 0.01, bands);
             }

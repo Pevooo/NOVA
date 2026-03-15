@@ -4,7 +4,7 @@ class AudioAnalyzer {
     constructor() {
         this.isRunning = false;
         this.source = null; // 'lively' or 'capture'
-        this.bufferLength = 128;
+        this.bufferLength = 512;
         this.frequencyData = new Uint8Array(this.bufferLength);
         this.timeDomainData = new Uint8Array(this.bufferLength);
 
@@ -13,6 +13,13 @@ class AudioAnalyzer {
         this.analyser = null;
         this.webFreqData = null;
         this.webTimeData = null;
+
+        // Lively audio processing state (match Web Audio API AnalyserNode behavior)
+        this._prevSmoothed = new Float32Array(this.bufferLength); // temporal smoothing buffer
+        this._livelyPhases = new Float32Array(64); // random phases for waveform synthesis
+        for (let i = 0; i < 64; i++) {
+            this._livelyPhases[i] = Math.random() * Math.PI * 2;
+        }
     }
 
     // Called each frame — if Lively is pushing audio, use it
@@ -22,23 +29,58 @@ class AudioAnalyzer {
             if (!audioArray) return;
             this.isRunning = true;
 
+            const srcLen = audioArray.length || 128;
+            const smoothing = 0.8; // Match Web Audio API default smoothingTimeConstant
+            // Lively values are normalized [0-1], not raw FFT magnitudes,
+            // so use a dB range scaled for that domain
+            const minDB = -50, maxDB = 0, dbRange = maxDB - minDB;
+
+            // --- Frequency data: interpolate, smooth, apply dB curve ---
             for (let i = 0; i < this.bufferLength; i++) {
-                this.frequencyData[i] = Math.min(255, Math.max(0, Math.round((audioArray[i] || 0) * 255)));
+                // Linear interpolation from Lively's 128 bins to 512
+                const srcPos = (i / this.bufferLength) * srcLen;
+                const lo = Math.floor(srcPos);
+                const hi = Math.min(lo + 1, srcLen - 1);
+                const frac = srcPos - lo;
+                const raw = (audioArray[lo] || 0) * (1 - frac) + (audioArray[hi] || 0) * frac;
+
+                // Temporal smoothing (same as AnalyserNode.smoothingTimeConstant)
+                const smoothed = smoothing * this._prevSmoothed[i] + (1 - smoothing) * raw;
+                this._prevSmoothed[i] = smoothed;
+
+                // Convert linear amplitude to dB-scaled byte
+                // Gives natural dynamic range: quiet signals visible, loud signals don't clip
+                let dbByte = 0;
+                if (smoothed > 0.00001) {
+                    const dB = 20 * Math.log10(smoothed);
+                    dbByte = 255 * (dB - minDB) / dbRange;
+                }
+                this.frequencyData[i] = Math.min(255, Math.max(0, Math.round(dbByte)));
             }
-            let sum = 0;
-            for (let i = 0; i < audioArray.length; i++) sum += audioArray[i] || 0;
-            const energy = sum / audioArray.length;
-            const t = performance.now() * 0.005;
+
+            // --- Time-domain data: additive synthesis from frequency content ---
+            // Simulate what getByteTimeDomainData returns (PCM waveform centered at 128)
+            const t = performance.now() * 0.001;
+            const numHarmonics = 48;
             for (let i = 0; i < this.bufferLength; i++) {
-                const deviation = Math.sin(i * 0.3 + t) * energy * 80;
-                this.timeDomainData[i] = Math.min(255, Math.max(0, Math.round(128 + deviation)));
+                let sample = 0;
+                const pos = i / this.bufferLength;
+                for (let h = 0; h < numHarmonics; h++) {
+                    // Sample amplitude from the smoothed Lively data
+                    const srcIdx = Math.floor((h / numHarmonics) * srcLen);
+                    const amp = this._prevSmoothed[Math.floor((h / numHarmonics) * this.bufferLength)];
+                    if (amp < 0.005) continue;
+                    // Each harmonic oscillates at its own frequency with a pre-randomized phase
+                    const phase = this._livelyPhases[h % 64];
+                    sample += Math.sin(pos * Math.PI * 2 * (h + 1) + phase + t * (h + 1) * 0.4) * amp;
+                }
+                // Scale and center around 128, clamp to [0, 255]
+                this.timeDomainData[i] = Math.min(255, Math.max(0, Math.round(128 + sample * 55)));
             }
         } else if (this.source === 'capture' && this.analyser) {
             this.analyser.getByteFrequencyData(this.webFreqData);
             this.analyser.getByteTimeDomainData(this.webTimeData);
-            // Copy into our standard buffers
-            const len = Math.min(this.bufferLength, this.webFreqData.length);
-            for (let i = 0; i < len; i++) {
+            for (let i = 0; i < this.bufferLength; i++) {
                 this.frequencyData[i] = this.webFreqData[i];
                 this.timeDomainData[i] = this.webTimeData[i];
             }
@@ -88,7 +130,7 @@ class AudioAnalyzer {
 
         const sourceNode = this.audioContext.createMediaStreamSource(stream);
         this.analyser = this.audioContext.createAnalyser();
-        this.analyser.fftSize = 256;
+        this.analyser.fftSize = this.bufferLength * 2;
         sourceNode.connect(this.analyser);
 
         this.webFreqData = new Uint8Array(this.analyser.frequencyBinCount);
