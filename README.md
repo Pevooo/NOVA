@@ -196,3 +196,15 @@ This project is open source and available for personal and educational use.
 ---
 
 **Made with ❤️ for music lovers and visual enthusiasts**
+
+## Lively Wallpaper Setup
+
+If you'd like to use this visualization as a desktop wallpaper with Lively Wallpaper, follow these steps:
+
+1. Install **Lively Wallpaper** from the Microsoft Store.
+2. Copy `wallpaper/LivelyInfo.json` somewhere safe for now (you'll paste it back later).
+3. In Lively, click **Add wallpaper**, navigate to the `wallpaper` folder in this project, select `index.html`, and press **OK**.
+4. Right-click the newly added wallpaper in Lively, choose **Open file location**, and paste the `LivelyInfo.json` file you copied earlier (override when prompted).
+5. Customize settings by right-clicking the wallpaper in Lively and selecting **Customize**.
+6. Have fun!
+

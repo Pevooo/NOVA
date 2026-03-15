@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOVA — Audio Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script>
+    // Lively Wallpaper audio hook — declared early so Lively detects audio support
+    function livelyAudioListener(audioArray) {
+        window._livelyAudioData = audioArray;
+    }
+    </script>
+</head>
+<body>
+    <!-- Full-screen canvas -->
+    <canvas id="canvas2d"></canvas>
+    <canvas id="canvasWebGL" style="display:none;"></canvas>
+
+    <!-- All UI hidden — wallpaper mode (Lively injects audio automatically) -->
+    <div id="splash" class="splash" style="display:none;"></div>
+
+    <div id="statsPanel" class="glass-panel stats-panel hidden" style="display:none;">
+        <span id="bpmValue"></span>
+        <div id="energyBar" class="stat-bar"></div>
+        <div id="bassBar" class="stat-bar"></div>
+        <div id="midBar" class="stat-bar"></div>
+        <div id="trebleBar" class="stat-bar"></div>
+        <span id="beatDot" class="beat-dot"></span>
+        <span id="fpsValue"></span>
+        <span id="particleValue"></span>
+    </div>
+
+    <div id="controlBar" class="glass-panel control-bar hidden" style="display:none;">
+        <button id="stopBtn" style="display:none;"></button>
+        <select id="visualMode" style="display:none;">
+            <option value="combined">Combined</option>
+            <option value="particles">Particles</option>
+            <option value="waveform">Waveform</option>
+            <option value="spectrum">Spectrum</option>
+            <option value="3d">3D Shapes</option>
+            <option value="tunnel">Tunnel</option>
+            <option value="kaleidoscope">Kaleidoscope</option>
+            <option value="galaxy">Galaxy</option>
+        </select>
+        <select id="colorTheme" style="display:none;">
+            <option value="neon">Neon Party</option>
+            <option value="ocean">Deep Ocean</option>
+            <option value="fire">Inferno</option>
+            <option value="aurora">Aurora</option>
+            <option value="mono">Monochrome</option>
+            <option value="candy">Candy</option>
+            <option value="cosmic">Cosmic</option>
+            <option value="matrix">Matrix</option>
+            <option value="sunset">Sunset</option>
+        </select>
+        <input type="range" id="sensitivity" min="0.1" max="5" step="0.1" value="1.2" style="display:none;">
+        <input type="range" id="particleCount" min="0" max="200" step="10" value="200" style="display:none;">
+    </div>
+
+    <audio id="audioPlayer" crossorigin="anonymous" style="display:none;"></audio>
+    <input type="file" id="audioFile" accept="audio/*" style="display:none;">
+
+    <script src="src/audioAnalyzer.js"></script>
+    <script src="src/beatDetector.js"></script>
+    <script src="src/colorGradient.js"></script>
+    <script src="src/particleSystem.js"></script>
+    <script src="src/waveformRenderer.js"></script>
+    <script src="src/threeDRenderer.js"></script>
+    <script src="src/starfield.js"></script>
+    <script src="src/lightning.js"></script>
+    <script src="src/visualizationEngine.js"></script>
+    <script src="src/app.js"></script>
+</body>
+</html>
