@@ -30,6 +30,16 @@
       "Sunset"
     ]
   },
+  "lyricsMode": {
+    "type": "dropdown",
+    "value": 0,
+    "text": "Lyrics Display",
+    "items": [
+      "Center (Karaoke)",
+      "Side Panel",
+      "Off"
+    ]
+  },
   "sensitivity": {
     "type": "slider",
     "value": 1.2,

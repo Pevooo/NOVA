@@ -23,6 +23,20 @@
     <!-- All UI hidden — wallpaper mode (Lively injects audio automatically) -->
     <div id="splash" class="splash" style="display:none;"></div>
 
+    <!-- Now playing display (hidden until Lively provides metadata) -->
+    <div id="track-container" class="np-container">
+        <div class="np-glow"></div>
+        <div class="np-inner">
+            <div id="track-title" class="np-title"></div>
+            <div id="track-artist" class="np-artist"></div>
+        </div>
+    </div>
+
+    <!-- Synced lyrics panel -->
+    <div id="lyrics-container" class="lyrics-panel">
+        <div class="lyrics-body"></div>
+    </div>
+
     <div id="statsPanel" class="glass-panel stats-panel hidden" style="display:none;">
         <span id="bpmValue"></span>
         <div id="energyBar" class="stat-bar"></div>
@@ -73,6 +87,8 @@
     <script src="src/starfield.js"></script>
     <script src="src/lightning.js"></script>
     <script src="src/visualizationEngine.js"></script>
+    <script src="src/now-playing.js"></script>
+    <script src="src/lyrics.js"></script>
     <script src="src/app.js"></script>
 </body>
 </html>

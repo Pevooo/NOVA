@@ -152,6 +152,101 @@ body {
     75% { transform: translate(15px, 15px) scale(1.02); }
 }
 
+/* ── Now-playing container (bottom-left) ──────── */
+.np-container {
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    z-index: 60;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    max-width: 380px;
+}
+
+.np-container.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.np-inner {
+    position: relative;
+    padding: 14px 22px;
+    border-radius: 14px;
+    background: rgba(12, 10, 22, 0.6);
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+    overflow: hidden;
+}
+
+/* Animated accent bar along the top */
+.np-inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #a855f7, #ec4899, #06b6d4, #a855f7);
+    background-size: 300% 100%;
+    animation: npBarSlide 4s linear infinite;
+}
+
+@keyframes npBarSlide {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 300% 0%; }
+}
+
+/* Soft glow behind the container */
+.np-glow {
+    position: absolute;
+    inset: -8px;
+    border-radius: 22px;
+    background: radial-gradient(ellipse at 50% 50%,
+        rgba(168, 85, 247, 0.15) 0%,
+        rgba(236, 72, 153, 0.08) 40%,
+        transparent 70%);
+    filter: blur(16px);
+    z-index: -1;
+}
+
+.np-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.5),
+                 0 0 40px rgba(236, 72, 153, 0.2);
+}
+
+.np-artist {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 3px;
+    background: linear-gradient(90deg, #a855f7, #ec4899, #06b6d4);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: npArtistShift 6s ease-in-out infinite;
+}
+
+@keyframes npArtistShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
 /* ── Glassmorphism panels ───────────────────────── */
 .glass-panel {
     background: var(--glass);
@@ -458,6 +553,228 @@ body {
 .stat-bar {
     transition: width 0.06s linear;
     will-change: width;
+}
+
+/* ── Lyrics panel (shared base) ─────────────────── */
+.lyrics-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+    contain: layout style;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lyrics-panel.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lyrics-panel.off {
+    display: none !important;
+}
+
+/* ── Center mode (default karaoke) ───────────────── */
+.lyrics-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 85%;
+    max-width: 1000px;
+    height: 100%;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    text-align: center;
+    mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        rgba(0,0,0,0.1) 15%,
+        black 35%,
+        black 65%,
+        rgba(0,0,0,0.1) 85%,
+        transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        rgba(0,0,0,0.1) 15%,
+        black 35%,
+        black 65%,
+        rgba(0,0,0,0.1) 85%,
+        transparent 100%);
+    padding: 45vh 0 50vh 0;
+}
+
+.lyrics-body::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Side mode overrides ─────────────────────────── */
+.lyrics-panel.side {
+    inset: 0 0 0 auto;
+    width: 360px;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
+.lyrics-panel.side .lyrics-body {
+    width: 100%;
+    max-width: none;
+    text-align: left;
+    align-items: flex-start;
+    padding: 45vh 20px 50vh 20px;
+    mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        rgba(0,0,0,0.15) 8%,
+        black 20%,
+        black 80%,
+        rgba(0,0,0,0.15) 92%,
+        transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        rgba(0,0,0,0.15) 8%,
+        black 20%,
+        black 80%,
+        rgba(0,0,0,0.15) 92%,
+        transparent 100%);
+}
+
+.lyrics-panel.side .lyrics-line {
+    font-size: 18px;
+    font-weight: 700;
+    padding: 5px 14px;
+    transform: skewX(-2deg);
+}
+
+.lyrics-panel.side .lyrics-line.active {
+    font-size: 21px;
+    font-weight: 800;
+    transform: skewX(-2deg) translateX(4px) scale(1.03);
+}
+
+.lyrics-panel.side .lyrics-line.past-1 {
+    font-size: 16px;
+    transform: skewX(-2deg) translateX(2px);
+}
+
+.lyrics-panel.side .lyrics-line.past-near {
+    transform: skewX(-2deg);
+}
+
+.lyrics-panel.side .lyrics-line.past-far {
+    transform: skewX(-2deg) scale(0.96);
+}
+
+/* ── Base lyrics line ────────────────────────────── */
+.lyrics-line {
+    font-size: 42px;
+    font-weight: 800;
+    font-style: italic;
+    line-height: 1.35;
+    opacity: 0;
+    color: #fff;
+    padding: 10px 28px;
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    will-change: opacity, transform;
+    transition:
+        opacity 0.5s ease,
+        transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        text-shadow 0.3s ease,
+        color 0.15s ease;
+    transform-origin: center center;
+    transform: skewX(-2deg);
+    user-select: none;
+    -webkit-user-select: none;
+    letter-spacing: -0.3px;
+}
+
+.lyrics-line:hover {
+    opacity: 0.25;
+}
+
+/* ── Active line ─────────────────────────────────── */
+.lyrics-line.active {
+    opacity: 0.85;
+    font-size: 48px;
+    font-weight: 900;
+    transform: skewX(-2deg) scale(1.06);
+    text-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+    letter-spacing: -0.5px;
+}
+
+/* ── Past lines ──────────────────────────────────── */
+.lyrics-line.past-1 {
+    opacity: 0.3;
+    font-size: 36px;
+    transform: skewX(-2deg) scale(0.96);
+}
+
+.lyrics-line.past-near {
+    opacity: 0.12;
+    transform: skewX(-2deg) scale(0.92);
+}
+
+.lyrics-line.past-far {
+    opacity: 0.04;
+    transform: skewX(-2deg) scale(0.88);
+}
+
+/* ── Upcoming lines — hidden ─────────────────────── */
+.lyrics-line.upcoming {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ── Empty / instrumental breaks ─────────────────── */
+.lyrics-line:empty,
+.lyrics-line.empty-line {
+    min-height: 20px;
+    pointer-events: none;
+}
+
+/* ── Beat punch — scale slam + color tint ────────── */
+.lyrics-line.beat {
+    color: #d8b4fe;
+    transform: skewX(-2deg) scale(1.12);
+    text-shadow:
+        0 0 40px rgba(168, 85, 247, 0.9),
+        0 0 80px rgba(236, 72, 153, 0.5);
+    transition: color 0.05s ease, text-shadow 0.05s ease, transform 0.05s ease;
+}
+
+.lyrics-line.beat-pink {
+    color: #f9a8d4;
+    transform: skewX(-2deg) scale(1.12);
+    text-shadow:
+        0 0 40px rgba(236, 72, 153, 0.9),
+        0 0 80px rgba(168, 85, 247, 0.4);
+    transition: color 0.05s ease, text-shadow 0.05s ease, transform 0.05s ease;
+}
+
+.lyrics-line.beat-cyan {
+    color: #a5f3fc;
+    transform: skewX(-2deg) scale(1.12);
+    text-shadow:
+        0 0 40px rgba(6, 182, 212, 0.9),
+        0 0 80px rgba(168, 85, 247, 0.4);
+    transition: color 0.05s ease, text-shadow 0.05s ease, transform 0.05s ease;
+}
+
+/* ── Entrance slam — new active line drops in ────── */
+@keyframes lyricsSlam {
+    0%   { transform: skewX(-2deg) scale(1.25); opacity: 0; }
+    60%  { transform: skewX(-2deg) scale(1.02); opacity: 0.9; }
+    100% { transform: skewX(-2deg) scale(1.06); opacity: 0.85; }
+}
+
+.lyrics-line.slam {
+    animation: lyricsSlam 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* ── Custom cursor ──────────────────────────────── */

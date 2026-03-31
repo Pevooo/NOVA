@@ -89,8 +89,9 @@ class AudioVisualizationApp {
             const freq = this.audioAnalyzer.getFrequencyData();
             const time = this.audioAnalyzer.getTimeDomainData();
 
+            let beat = false;
             if (freq) {
-                const beat   = this.beatDetector.detectBeat(freq);
+                beat = this.beatDetector.detectBeat(freq);
                 const bands  = this.beatDetector.getFrequencyBands(freq);
                 const energy = this.beatDetector.detectEnergy(freq);
                 this.beatDetector.detectBass(freq);
@@ -102,6 +103,12 @@ class AudioVisualizationApp {
                 this.visualizationEngine.render(silence, silenceTime, false, 0.01, bands);
             }
 
+            // Tick lyrics in the same frame — no second rAF loop
+            if (this._lyricsHandler) {
+                this._lyricsHandler.tick();
+                if (beat) this._lyricsHandler.beatPulse();
+            }
+
             requestAnimationFrame(loop);
         };
         requestAnimationFrame(loop);
@@ -110,11 +117,37 @@ class AudioVisualizationApp {
 
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new AudioVisualizationApp();
+
+    // Lyrics handler — attach to app so the main loop ticks it
+    const lyricsHandler = window.createLyricsHandler
+        ? window.createLyricsHandler('#lyrics-container')
+        : null;
+    window.app._lyricsHandler = lyricsHandler;
+
+    // Now-playing integration: create handler and expose as global for Lively
+    if (window.createNowPlayingHandler) {
+        const nowPlayingHandler = window.createNowPlayingHandler({
+            trackContainer: '#track-container',
+            albumArt: '#albumart',
+            title: '#track-title',
+            artist: '#track-artist',
+            defaultBackground: ''
+        });
+        // Lively calls `livelyCurrentTrack` on track change, seek, and resume
+        window.livelyCurrentTrack = function (data) {
+            nowPlayingHandler(data);
+            if (lyricsHandler) {
+                const obj = typeof data === 'string' ? JSON.parse(data) : data;
+                lyricsHandler.update(obj ? (obj.Title || '') : '', obj ? (obj.Artist || '') : '');
+            }
+        };
+    }
 });
 
 // ── Lively Wallpaper property listener ──────────────────
 const _modes  = ['combined', 'particles', 'waveform', 'spectrum', '3d', 'tunnel', 'kaleidoscope', 'galaxy'];
 const _themes = ['neon', 'ocean', 'fire', 'aurora', 'mono', 'candy', 'cosmic', 'matrix', 'sunset'];
+const _lyricsModes = ['center', 'side', 'off'];
 
 function livelyPropertyListener(name, val) {
     const app = window.app;
@@ -132,6 +165,11 @@ function livelyPropertyListener(name, val) {
             break;
         case 'particleCount':
             app.visualizationEngine.setParticleCount(parseInt(val));
+            break;
+        case 'lyricsMode':
+            if (app._lyricsHandler) {
+                app._lyricsHandler.setMode(_lyricsModes[parseInt(val)] || 'center');
+            }
             break;
     }
 }

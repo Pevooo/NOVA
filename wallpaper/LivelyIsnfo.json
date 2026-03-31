@@ -9,7 +9,7 @@
   "Contact": "",
   "Type": 1,
   "FileName": "index.html",
-  "Arguments": "--audio",
+  "Arguments": "--audio --system-nowplaying --pause-event true",
   "IsAbsolutePath": false,
   "Id": null,
   "Tags": null,
